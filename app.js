@@ -305,6 +305,10 @@ function zeroPct(player) {
   return player.receive.filter(value => Number(value) === 0).length / player.receive.length;
 }
 
+function passHistory(player) {
+  return player.receive.length ? player.receive.join(", ") : "-";
+}
+
 function attackStats(player) {
   const attacks = player.attacks || [];
   const kills = attacks.filter(value => value === "+" || value === "T").length;
@@ -349,7 +353,7 @@ function hitRanks(team) {
 function renderHeatMap(team) {
   if (!state.settings.receive || !state.settings.heat) return "";
   const ranks = srRanks(team).slice(0, 3);
-  if (!ranks.length) return `<div class="heatMap"><div class="empty">SR heat map appears after the first pass.</div></div>`;
+  if (!ranks.length) return `<div class="heatMap"><div class="empty">SR heat map appears after the first pass. Ties sort worse by higher 0%.</div></div>`;
 
   return `<div class="heatMap">${[0, 1, 2].map(index => {
     const rank = ranks[index];
@@ -387,6 +391,7 @@ function renderTeam(team, teamIndex) {
 function renderPlayer(player, teamIndex) {
   const srAvg = receiveAvg(player) || "-";
   const srCount = player.receive.length || "-";
+  const srZeroPct = player.receive.length ? `${Math.round(zeroPct(player) * 100)}%` : "-";
   const attacks = attackStats(player);
   const attackPct = attacks.pct || "-";
 
@@ -397,9 +402,10 @@ function renderPlayer(player, teamIndex) {
         <div class="role">${player.libero ? "LIBERO" : "PLAYER"}</div>
       </div>
       <div class="playerMetrics">
-        ${state.settings.receive ? `<div class="metric">SR<b>${srAvg}</b></div><div class="metric">Passes<b>${srCount}</b></div>` : ""}
+        ${state.settings.receive ? `<div class="metric">SR<b>${srAvg}</b></div><div class="metric">Passes<b>${srCount}</b></div><div class="metric">0%<b>${srZeroPct}</b></div>` : ""}
         ${state.settings.attack ? `<div class="metric">Hit %<b>${attackPct}</b></div>` : ""}
       </div>
+      ${state.settings.receive ? `<div class="playerHistory"><b>SR hist:</b> ${esc(passHistory(player))}</div>` : ""}
       <div class="playerActions">
         ${state.settings.receive ? `<button type="button" class="srBtn" onclick="openScore('receive', ${teamIndex}, '${player.id}')">SR</button>` : ""}
         ${state.settings.attack ? `<button type="button" class="attBtn" onclick="openScore('attack', ${teamIndex}, '${player.id}')">ATT</button>` : ""}

@@ -281,6 +281,9 @@ h1 {
 .playerRow {
   display: grid;
   grid-template-columns: minmax(62px, 78px) 1fr auto;
+  grid-template-areas:
+    "id metrics actions"
+    "id history actions";
   gap: 5px;
   align-items: stretch;
   min-height: 56px;
@@ -295,6 +298,7 @@ h1 {
 }
 
 .playerId {
+  grid-area: id;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -319,6 +323,7 @@ h1 {
 }
 
 .playerMetrics {
+  grid-area: metrics;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 4px;
@@ -344,11 +349,29 @@ h1 {
 }
 
 .playerActions {
+  grid-area: actions;
   display: grid;
   grid-auto-flow: column;
   grid-auto-columns: 46px;
   gap: 4px;
   align-items: stretch;
+}
+
+.playerHistory {
+  grid-area: history;
+  min-width: 0;
+  padding: 3px 5px;
+  border: 1px solid #ecebe5;
+  border-radius: 6px;
+  background: #fafaf7;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.playerHistory b {
+  color: var(--text);
 }
 
 .srBtn {
