@@ -483,6 +483,26 @@ h1 {
   padding-inline: 2px;
 }
 
+.scoreChoices.attack .scoreKill,
+.scoreChoices.attack .scoreTipKill {
+  background: #dff4e8;
+  border-color: #4ea978;
+  color: #0a4d2e;
+}
+
+.scoreChoices.attack .scoreError {
+  background: #f9dddd;
+  border-color: #d25a5a;
+  color: #8d1717;
+}
+
+.scoreChoices.attack .scoreAttempt,
+.scoreChoices.attack .scoreTipAttempt {
+  background: #fff;
+  border-color: var(--line);
+  color: var(--ink);
+}
+
 .rosterList {
   display: grid;
   gap: 6px;

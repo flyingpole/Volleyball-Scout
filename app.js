@@ -238,16 +238,17 @@ function openScore(type, teamIndex, playerId) {
   const choices = type === "receive"
     ? [{ value: 0, text: "0" }, { value: 1, text: "1" }, { value: 2, text: "2" }, { value: 3, text: "3" }]
     : [
-      { value: "T", text: "Tip Kill" },
-      { value: "t", text: "tip att" },
-      { value: "-", text: "Error" },
-      { value: ".", text: "Attempt" },
-      { value: "+", text: "Kill" }
+      { value: "T", text: "Tip Kill", className: "scoreTipKill" },
+      { value: "t", text: "tip att", className: "scoreTipAttempt" },
+      { value: "-", text: "Error", className: "scoreError" },
+      { value: ".", text: "Attempt", className: "scoreAttempt" },
+      { value: "+", text: "Kill", className: "scoreKill" }
     ];
 
   choices.forEach(choice => {
     const button = document.createElement("button");
     button.type = "button";
+    if (choice.className) button.className = choice.className;
     button.textContent = choice.text;
     button.addEventListener("click", () => recordScore(choice.value));
     scoreChoices.appendChild(button);
@@ -474,91 +475,6 @@ function renderPrintSummary() {
   `;
 }
 
-function makePdfLines() {
-  const lines = [
-    "Volleyball Scout",
-    `Date: ${todayStamp()}`,
-    `Teams: ${state.settings.twoTeams ? "2" : "1"}`,
-    `Tracking: ${state.settings.receive ? "Serve Receive" : ""}${state.settings.receive && state.settings.attack ? " + " : ""}${state.settings.attack ? "Attacking" : ""}`,
-    ""
-  ];
-
-  visibleTeams().forEach((team, teamIndex) => {
-    const summary = teamSummary(team);
-    lines.push(`${teamIndex + 1}. ${team.name || `Team ${teamIndex + 1}`}`);
-    if (state.settings.receive) lines.push(`Serve receive average: ${summary.sr}`);
-    if (state.settings.attack) lines.push(`Hitting: ${summary.hitPct}   K/E/TA: ${summary.kills}/${summary.errors}/${summary.attempts}`);
-    lines.push("");
-
-    if (state.settings.receive) {
-      lines.push("Serve Receive Ranking - ties sort worse by higher 0%");
-      lines.push("Player        Avg     0%      Passes   History");
-      lines.push("------------------------------------------------------------");
-      const ranks = srRanks(team);
-      if (ranks.length) {
-        ranks.forEach(rank => {
-          lines.push(
-            padRight(label(rank.player.number), 14) +
-            padRight(rank.avg.toFixed(2), 8) +
-            padRight(`${Math.round(rank.zeros * 100)}%`, 8) +
-            padRight(rank.attempts, 9) +
-            passHistory(rank.player)
-          );
-        });
-      } else {
-        lines.push("No serve receive data.");
-      }
-      lines.push("");
-    }
-
-    if (state.settings.attack) {
-      lines.push("Attacking Ranking");
-      lines.push("Player        Hit%    K     E     TA    Tips   History");
-      lines.push("------------------------------------------------------------");
-      const ranks = hitRanks(team);
-      if (ranks.length) {
-        ranks.forEach(rank => {
-          lines.push(
-            padRight(label(rank.player.number), 14) +
-            padRight(rank.stats.pct || ".000", 8) +
-            padRight(rank.stats.kills, 6) +
-            padRight(rank.stats.errors, 6) +
-            padRight(rank.stats.attempts, 6) +
-            padRight(`${rank.stats.tipKills}/${rank.stats.tips}`, 7) +
-            (rank.player.attacks.length ? rank.player.attacks.join(", ") : "-")
-          );
-        });
-      } else {
-        lines.push("No attack data.");
-      }
-      lines.push("");
-    }
-
-    lines.push("Roster");
-    lines.push("Player        Role      SR Avg  0%      Passes  Hit%    K/E/TA");
-    lines.push("------------------------------------------------------------");
-    if (team.players.length) {
-      team.players.forEach(player => {
-        const attacks = attackStats(player);
-        lines.push(
-          padRight(label(player.number), 14) +
-          padRight(player.libero ? "Libero" : "Player", 10) +
-          padRight(receiveAvg(player) || "-", 8) +
-          padRight(player.receive.length ? `${Math.round(zeroPct(player) * 100)}%` : "-", 8) +
-          padRight(player.receive.length || "-", 8) +
-          padRight(attacks.pct || "-", 8) +
-          `${attacks.kills}/${attacks.errors}/${attacks.attempts}`
-        );
-      });
-    } else {
-      lines.push("No players.");
-    }
-    lines.push("");
-  });
-
-  return lines;
-}
-
 function todayStamp() {
   const date = new Date();
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
@@ -583,43 +499,185 @@ function pdfEscape(value) {
     .replace(/\)/g, "\\)");
 }
 
-function buildPdfBlob(lines) {
-  const pageWidth = 612;
-  const pageHeight = 792;
-  const margin = 42;
-  const lineHeight = 14;
-  const linesPerPage = Math.floor((pageHeight - margin * 2) / lineHeight);
-  const pages = [];
+function trimPdfText(value, maxLength) {
+  const text = String(value ?? "-");
+  if (text.length <= maxLength) return text;
+  return `${text.slice(0, Math.max(0, maxLength - 1))}.`;
+}
 
-  for (let index = 0; index < lines.length; index += linesPerPage) {
-    pages.push(lines.slice(index, index + linesPerPage));
-  }
-  if (!pages.length) pages.push(["No scouting data."]);
+function pdfColor(color) {
+  const colors = {
+    black: "0.08 0.08 0.08",
+    blue: "0.08 0.22 0.38",
+    darkGreen: "0.04 0.31 0.20",
+    green: "0.90 0.97 0.92",
+    red: "0.98 0.90 0.90",
+    gray: "0.43 0.45 0.43",
+    header: "0.13 0.15 0.13",
+    line: "0.78 0.80 0.76",
+    panel: "0.99 0.99 0.96",
+    white: "1 1 1"
+  };
+  return colors[color] || colors.black;
+}
 
-  const objects = [];
-  const fontObjectNumber = 3 + pages.length * 2;
+function pdfText(text, x, y, size = 9, font = "F1", color = "black") {
+  return `BT /${font} ${size} Tf ${pdfColor(color)} rg ${x.toFixed(1)} ${y.toFixed(1)} Td (${pdfEscape(text)}) Tj ET\n`;
+}
 
-  objects[1] = "<< /Type /Catalog /Pages 2 0 R >>";
-  objects[2] = `<< /Type /Pages /Kids [${pages.map((_, index) => `${3 + index * 2} 0 R`).join(" ")}] /Count ${pages.length} >>`;
+function pdfRect(x, y, width, height, fill = null, stroke = "line") {
+  let content = "";
+  if (fill) content += `q ${pdfColor(fill)} rg ${x.toFixed(1)} ${y.toFixed(1)} ${width.toFixed(1)} ${height.toFixed(1)} re f Q\n`;
+  if (stroke) content += `q ${pdfColor(stroke)} RG ${x.toFixed(1)} ${y.toFixed(1)} ${width.toFixed(1)} ${height.toFixed(1)} re S Q\n`;
+  return content;
+}
 
-  pages.forEach((pageLines, index) => {
-    const pageObjectNumber = 3 + index * 2;
-    const contentObjectNumber = pageObjectNumber + 1;
-    let content = `BT\n/F1 10 Tf\n${margin} ${pageHeight - margin} Td\n`;
-    pageLines.forEach((line, lineIndex) => {
-      if (lineIndex > 0) content += `0 -${lineHeight} Td\n`;
-      content += `(${pdfEscape(line)}) Tj\n`;
-    });
-    content += "ET";
+function pdfLine(x1, y1, x2, y2, color = "line") {
+  return `q ${pdfColor(color)} RG ${x1.toFixed(1)} ${y1.toFixed(1)} m ${x2.toFixed(1)} ${y2.toFixed(1)} l S Q\n`;
+}
 
-    objects[pageObjectNumber] =
-      `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pageWidth} ${pageHeight}] ` +
-      `/Resources << /Font << /F1 ${fontObjectNumber} 0 R >> >> ` +
-      `/Contents ${contentObjectNumber} 0 R >>`;
-    objects[contentObjectNumber] = `<< /Length ${content.length} >>\nstream\n${content}\nendstream`;
+function pdfCircle(cx, cy, radius, fill = null, stroke = "line") {
+  const k = radius * 0.5522847498;
+  let content = `q ${fill ? `${pdfColor(fill)} rg ` : ""}${stroke ? `${pdfColor(stroke)} RG ` : ""}`;
+  content += `${(cx + radius).toFixed(1)} ${cy.toFixed(1)} m `;
+  content += `${(cx + radius).toFixed(1)} ${(cy + k).toFixed(1)} ${(cx + k).toFixed(1)} ${(cy + radius).toFixed(1)} ${cx.toFixed(1)} ${(cy + radius).toFixed(1)} c `;
+  content += `${(cx - k).toFixed(1)} ${(cy + radius).toFixed(1)} ${(cx - radius).toFixed(1)} ${(cy + k).toFixed(1)} ${(cx - radius).toFixed(1)} ${cy.toFixed(1)} c `;
+  content += `${(cx - radius).toFixed(1)} ${(cy - k).toFixed(1)} ${(cx - k).toFixed(1)} ${(cy - radius).toFixed(1)} ${cx.toFixed(1)} ${(cy - radius).toFixed(1)} c `;
+  content += `${(cx + k).toFixed(1)} ${(cy - radius).toFixed(1)} ${(cx + radius).toFixed(1)} ${(cy - k).toFixed(1)} ${(cx + radius).toFixed(1)} ${cy.toFixed(1)} c `;
+  content += fill && stroke ? "B Q\n" : fill ? "f Q\n" : "S Q\n";
+  return content;
+}
+
+function drawVolleyballMark(cx, cy) {
+  return pdfCircle(cx, cy, 18, "white", "blue") +
+    pdfLine(cx - 16, cy + 6, cx + 15, cy + 6, "line") +
+    pdfLine(cx - 15, cy - 7, cx + 14, cy - 7, "line") +
+    pdfLine(cx - 4, cy + 17, cx - 9, cy - 15, "line") +
+    pdfLine(cx + 6, cy + 16, cx + 12, cy - 12, "line");
+}
+
+function drawSummaryBox(title, value, x, y, width, fill) {
+  return pdfRect(x, y, width, 32, fill, "line") +
+    pdfText(title, x + 7, y + 20, 7, "F2", "gray") +
+    pdfText(value, x + 7, y + 7, 12, "F2", "black");
+}
+
+function drawTable(title, headers, rows, x, y, width, rowHeight, colWidths) {
+  const headerHeight = 18;
+  const titleHeight = 18;
+  const tableHeight = titleHeight + headerHeight + Math.max(1, rows.length) * rowHeight;
+  let content = pdfText(title, x, y - 12, 11, "F2", "blue");
+  const tableTop = y - titleHeight;
+  content += pdfRect(x, tableTop - headerHeight, width, headerHeight, "header", "header");
+
+  let cursor = x;
+  headers.forEach((header, index) => {
+    content += pdfText(header, cursor + 4, tableTop - 12, 7.5, "F2", "white");
+    cursor += colWidths[index];
   });
 
-  objects[fontObjectNumber] = "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>";
+  const bodyTop = tableTop - headerHeight;
+  const rowCount = Math.max(1, rows.length);
+  for (let rowIndex = 0; rowIndex < rowCount; rowIndex++) {
+    const rowY = bodyTop - (rowIndex + 1) * rowHeight;
+    content += pdfRect(x, rowY, width, rowHeight, rowIndex % 2 ? "white" : "panel", "line");
+    cursor = x;
+    (rows[rowIndex] || ["No data"]).forEach((cell, index) => {
+      content += pdfText(trimPdfText(cell, index === headers.length - 1 ? 28 : 12), cursor + 4, rowY + 5, 7.2, "F1", "black");
+      cursor += colWidths[index] || 0;
+    });
+  }
+
+  cursor = x;
+  colWidths.slice(0, -1).forEach(widthPart => {
+    cursor += widthPart;
+    content += pdfLine(cursor, tableTop - headerHeight, cursor, bodyTop - rowCount * rowHeight, "line");
+  });
+
+  return { content, height: tableHeight };
+}
+
+function pdfTeamRows(team) {
+  return team.players.map(player => {
+    const attacks = attackStats(player);
+    const srHistory = passHistory(player);
+    return [
+      label(player.number),
+      receiveAvg(player) || "-",
+      player.receive.length ? `${Math.round(zeroPct(player) * 100)}%` : "-",
+      player.receive.length || "-",
+      attacks.pct || "-",
+      `${attacks.kills}/${attacks.errors}/${attacks.attempts}`,
+      srHistory || "-"
+    ];
+  });
+}
+
+function buildTeamPanel(team, teamIndex, x, y, width, maxRows) {
+  const summary = teamSummary(team);
+  const panelHeight = 498;
+  let content = pdfRect(x, y - panelHeight, width, panelHeight, "white", "line");
+  content += pdfRect(x, y - 34, width, 34, "blue", "blue");
+  content += pdfText(team.name || `Team ${teamIndex + 1}`, x + 12, y - 22, 15, "F2", "white");
+
+  const boxY = y - 76;
+  const boxGap = 6;
+  const boxWidth = (width - 24 - boxGap * 2) / 3;
+  content += drawSummaryBox("SR Avg", summary.sr, x + 12, boxY, boxWidth, "green");
+  content += drawSummaryBox("Hit %", summary.hitPct, x + 12 + boxWidth + boxGap, boxY, boxWidth, "panel");
+  content += drawSummaryBox("K / E / TA", `${summary.kills}/${summary.errors}/${summary.attempts}`, x + 12 + (boxWidth + boxGap) * 2, boxY, boxWidth, "red");
+
+  const rows = pdfTeamRows(team).slice(0, maxRows);
+  const extraRows = Math.max(0, team.players.length - rows.length);
+  const table = drawTable(
+    extraRows ? `Roster Stats (${extraRows} more not shown)` : "Roster Stats",
+    ["Player", "SR", "0%", "Pass", "Hit", "K/E/TA", "SR Hist"],
+    rows,
+    x + 12,
+    y - 96,
+    width - 24,
+    17,
+    [44, 32, 30, 34, 34, 46, width - 244]
+  );
+  content += table.content;
+  return content;
+}
+
+function buildPdfBlob() {
+  const pageWidth = 792;
+  const pageHeight = 612;
+  const margin = 28;
+  const contentWidth = pageWidth - margin * 2;
+  const teams = visibleTeams();
+  const panelGap = teams.length > 1 ? 16 : 0;
+  const panelWidth = teams.length > 1 ? (contentWidth - panelGap) / 2 : contentWidth;
+  const maxRows = 20;
+
+  let content = "";
+  content += pdfRect(0, 0, pageWidth, pageHeight, "panel", null);
+  content += pdfText("Volleyball Scout", margin, pageHeight - 34, 22, "F2", "blue");
+  content += pdfText(`${todayStamp()} ${timeStamp().replace("-", ":")}   Tracking: ${state.settings.receive ? "Serve Receive" : ""}${state.settings.receive && state.settings.attack ? " + " : ""}${state.settings.attack ? "Attacking" : ""}`, margin, pageHeight - 52, 9, "F1", "gray");
+  content += pdfText("Serve receive ties sort worse by higher 0%.", pageWidth - 248, pageHeight - 52, 8, "F1", "gray");
+  content += pdfLine(margin, pageHeight - 64, pageWidth - margin, pageHeight - 64, "line");
+  content += drawVolleyballMark(pageWidth - 48, pageHeight - 36);
+
+  teams.forEach((team, index) => {
+    content += buildTeamPanel(team, index, margin + index * (panelWidth + panelGap), pageHeight - 82, panelWidth, maxRows);
+  });
+
+  const objects = [];
+  const fontRegular = 5;
+  const fontBold = 6;
+
+  objects[1] = "<< /Type /Catalog /Pages 2 0 R >>";
+  objects[2] = "<< /Type /Pages /Kids [3 0 R] /Count 1 >>";
+  objects[3] =
+    `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pageWidth} ${pageHeight}] ` +
+    `/Resources << /Font << /F1 ${fontRegular} 0 R /F2 ${fontBold} 0 R >> >> ` +
+    "/Contents 4 0 R >>";
+  objects[4] = `<< /Length ${content.length} >>\nstream\n${content}\nendstream`;
+  objects[fontRegular] = "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>";
+  objects[fontBold] = "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>";
 
   let pdf = "%PDF-1.4\n";
   const offsets = [0];
@@ -690,7 +748,7 @@ function hidePdfPanel() {
 
 function exportPDF() {
   const filename = reportFileName();
-  const blob = buildPdfBlob(makePdfLines());
+  const blob = buildPdfBlob();
   const file = new File([blob], filename, { type: "application/pdf" });
   const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
