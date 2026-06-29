@@ -31,6 +31,9 @@ const scoreDialog = document.getElementById("scoreDialog");
 const scoreChoices = document.getElementById("scoreChoices");
 const dialogTitle = document.getElementById("dialogTitle");
 const dialogMeta = document.getElementById("dialogMeta");
+const rosterDialog = document.getElementById("rosterDialog");
+const rosterTitle = document.getElementById("rosterTitle");
+const rosterList = document.getElementById("rosterList");
 const undoToast = document.getElementById("undoToast");
 const toastText = document.getElementById("toastText");
 
@@ -175,13 +178,35 @@ function addPlayer(teamIndex, libero) {
 function deletePlayer(teamIndex, playerId) {
   const player = findPlayer(teamIndex, playerId);
   if (!player) return;
-  const hasStats = player.receive.length || player.attacks.length;
-  if (hasStats && !confirm(`Delete ${label(player.number)} and all of that player's stats?`)) return;
+  if (!confirm(`Remove ${label(player.number)} from ${state.teams[teamIndex].name || `Team ${teamIndex + 1}`}?`)) return;
 
+  const reopenRoster = rosterDialog.open;
+  if (reopenRoster) rosterDialog.close();
   state.teams[teamIndex].players = state.teams[teamIndex].players.filter(item => item.id !== playerId);
   state.history = state.history.filter(item => !(item.team === teamIndex && item.id === playerId));
   save();
   render();
+  if (reopenRoster) openRoster(teamIndex);
+}
+
+function openRoster(teamIndex) {
+  const team = state.teams[teamIndex];
+  rosterTitle.textContent = `${team.name || `Team ${teamIndex + 1}`} Roster`;
+  rosterList.innerHTML = team.players.length
+    ? team.players.map(player => {
+      const attacks = attackStats(player);
+      return `
+        <div class="rosterRow">
+          <div class="rosterPlayer">
+            ${esc(label(player.number))}
+            <span class="rosterMeta">${player.libero ? "Libero" : "Player"} - SR ${player.receive.length} - ATT ${attacks.attempts}</span>
+          </div>
+          <button type="button" class="removePlayerBtn" onclick="deletePlayer(${teamIndex}, '${player.id}')">Remove</button>
+        </div>
+      `;
+    }).join("")
+    : `<div class="empty">No players on this roster.</div>`;
+  rosterDialog.showModal();
 }
 
 function openScore(type, teamIndex, playerId) {
@@ -340,6 +365,7 @@ function renderTeam(team, teamIndex) {
     <section class="team">
       <div class="teamTop">
         <input class="teamName" value="${esc(team.name)}" oninput="renameTeam(${teamIndex}, this.value)" autocomplete="off">
+        <button type="button" class="rosterBtn" onclick="openRoster(${teamIndex})">Roster</button>
         <div class="teamStats">
           ${state.settings.receive ? `SR <b>${summary.sr}</b><br>` : ""}
           ${state.settings.attack ? `Hit <b>${summary.hitPct}</b><br>K/E/TA <b>${summary.kills}/${summary.errors}/${summary.attempts}</b>` : ""}
@@ -377,7 +403,6 @@ function renderPlayer(player, teamIndex) {
       <div class="playerActions">
         ${state.settings.receive ? `<button type="button" class="srBtn" onclick="openScore('receive', ${teamIndex}, '${player.id}')">SR</button>` : ""}
         ${state.settings.attack ? `<button type="button" class="attBtn" onclick="openScore('attack', ${teamIndex}, '${player.id}')">ATT</button>` : ""}
-        <button type="button" class="deleteBtn" onclick="deletePlayer(${teamIndex}, '${player.id}')" aria-label="Delete ${esc(label(player.number))}">x</button>
       </div>
     </div>
   `;

@@ -172,7 +172,7 @@ h1 {
 
 .teamTop {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: 1fr 68px auto;
   gap: 6px;
   align-items: center;
   padding: 7px;
@@ -199,6 +199,13 @@ h1 {
 
 .teamStats b {
   color: var(--text);
+}
+
+.rosterBtn {
+  min-height: 37px;
+  padding: 0 5px;
+  font-size: 12px;
+  background: #f6f6f1;
 }
 
 .addRow {
@@ -356,13 +363,6 @@ h1 {
   color: #0d5035;
 }
 
-.deleteBtn {
-  width: 34px;
-  color: var(--danger);
-  border-color: #e0a09a;
-  background: #fff5f4;
-}
-
 .bottomBar {
   position: fixed;
   left: 0;
@@ -383,7 +383,8 @@ h1 {
   color: var(--danger);
 }
 
-.scoreDialog {
+.scoreDialog,
+.rosterDialog {
   width: min(360px, calc(100vw - 22px));
   border: 1px solid #777;
   border-radius: 8px;
@@ -391,11 +392,13 @@ h1 {
   box-shadow: 0 12px 40px #0007;
 }
 
-.scoreDialog::backdrop {
+.scoreDialog::backdrop,
+.rosterDialog::backdrop {
   background: #0007;
 }
 
-.scoreDialog form {
+.scoreDialog form,
+.rosterDialog form {
   margin: 0;
   padding: 10px;
 }
@@ -440,6 +443,43 @@ h1 {
 .scoreChoices button {
   min-height: 70px;
   font-size: 28px;
+}
+
+.rosterList {
+  display: grid;
+  gap: 6px;
+}
+
+.rosterRow {
+  display: grid;
+  grid-template-columns: 1fr 82px;
+  gap: 8px;
+  align-items: center;
+  min-height: 46px;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: #fafaf7;
+}
+
+.rosterPlayer {
+  min-width: 0;
+  font-weight: 900;
+  overflow-wrap: anywhere;
+}
+
+.rosterMeta {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.removePlayerBtn {
+  color: var(--danger);
+  border-color: #e0a09a;
+  background: #fff5f4;
 }
 
 .undoToast {
@@ -491,7 +531,7 @@ h1 {
     padding: 0;
   }
 
-  .appHeader, .modeBar, .settingsPanel, .teams, .bottomBar, .scoreDialog, .undoToast {
+  .appHeader, .modeBar, .settingsPanel, .teams, .bottomBar, .scoreDialog, .rosterDialog, .undoToast {
     display: none !important;
   }
 

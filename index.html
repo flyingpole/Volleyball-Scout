@@ -68,6 +68,19 @@
     </form>
   </dialog>
 
+  <dialog id="rosterDialog" class="rosterDialog">
+    <form method="dialog">
+      <div class="dialogTop">
+        <div>
+          <div id="rosterTitle" class="dialogTitle">Roster</div>
+          <div class="dialogMeta">Remove players entered by mistake.</div>
+        </div>
+        <button type="submit" class="closeBtn" aria-label="Close">x</button>
+      </div>
+      <div id="rosterList" class="rosterList"></div>
+    </form>
+  </dialog>
+
   <div id="undoToast" class="undoToast" role="status" aria-live="polite">
     <span id="toastText">Recorded</span>
     <button type="button" id="toastUndoBtn">Undo</button>
