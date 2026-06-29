@@ -438,7 +438,7 @@ function renderPlayer(player, teamIndex) {
         ${state.settings.attack || state.settings.receive ? `<div class="metricPair ${state.settings.attack && state.settings.receive ? "" : "singleMetricPair"}">${state.settings.attack ? `<div class="metric hitMetric">Hit %<b>${attackPct}</b><span>K/E/TA ${attacks.kills}/${attacks.errors}/${attacks.attempts}</span></div>` : ""}${state.settings.receive ? `<div class="metric historyMetric"><b>SR hist:</b> ${esc(passHistory(player))}</div>` : ""}</div>` : ""}
       </div>
       <div class="playerActions">
-        ${state.settings.receive ? `<button type="button" class="srBtn" onclick="openScore('receive', ${teamIndex}, '${player.id}')">Serve Receive</button>` : ""}
+        ${state.settings.receive ? `<button type="button" class="srBtn" onclick="openScore('receive', ${teamIndex}, '${player.id}')">Serve<br>Rcv</button>` : ""}
         ${state.settings.attack ? `<button type="button" class="attBtn" onclick="handleAttackClick(${teamIndex}, '${player.id}')" ondblclick="handleAttackDoubleClick(event, ${teamIndex}, '${player.id}')" title="Double-click for attempt">Attack</button>` : ""}
       </div>
     </div>
