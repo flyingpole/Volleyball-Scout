@@ -208,15 +208,17 @@ h1 {
   background: #f6f6f1;
 }
 
-.addRow {
+.rosterAddRow {
   display: grid;
   grid-template-columns: 1fr 74px 74px;
   gap: 5px;
   padding: 7px;
-  border-bottom: 1px solid var(--line);
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: #fafaf7;
 }
 
-.addRow input {
+.rosterAddRow input {
   min-width: 0;
   border: 1px solid #aaa;
   border-radius: 7px;
@@ -224,7 +226,7 @@ h1 {
   font-size: 16px;
 }
 
-.addRow button {
+.rosterAddRow button {
   padding: 0 4px;
   font-size: 12px;
   line-height: 1.05;

@@ -178,6 +178,7 @@ function addPlayer(teamIndex, libero) {
   input.value = "";
   save();
   render();
+  if (rosterDialog.open) openRoster(teamIndex);
 }
 
 function deletePlayer(teamIndex, playerId) {
@@ -197,8 +198,15 @@ function deletePlayer(teamIndex, playerId) {
 function openRoster(teamIndex) {
   const team = state.teams[teamIndex];
   rosterTitle.textContent = `${team.name || `Team ${teamIndex + 1}`} Roster`;
-  rosterList.innerHTML = team.players.length
-    ? team.players.map(player => {
+  if (rosterDialog.open) rosterDialog.close();
+  rosterList.innerHTML = `
+    <div class="rosterAddRow">
+      <input id="playerInput${teamIndex}" placeholder="Player # or name" inputmode="numeric" autocomplete="off" onkeydown="if(event.key==='Enter')addPlayer(${teamIndex}, false)">
+      <button type="button" onclick="addPlayer(${teamIndex}, false)">Add<br>Player</button>
+      <button type="button" class="libBtn" onclick="addPlayer(${teamIndex}, true)">Add<br>Libero</button>
+    </div>
+    ${team.players.length
+      ? team.players.map(player => {
       const attacks = attackStats(player);
       return `
         <div class="rosterRow">
@@ -210,8 +218,11 @@ function openRoster(teamIndex) {
         </div>
       `;
     }).join("")
-    : `<div class="empty">No players on this roster.</div>`;
+      : `<div class="empty">No players on this roster.</div>`}
+  `;
   rosterDialog.showModal();
+  const input = document.getElementById(`playerInput${teamIndex}`);
+  if (input) input.focus();
 }
 
 function openScore(type, teamIndex, playerId) {
@@ -399,11 +410,6 @@ function renderTeam(team, teamIndex) {
           ${state.settings.receive ? `SR <b>${summary.sr}</b><br>` : ""}
           ${state.settings.attack ? `Hit <b>${summary.hitPct}</b><br>K/E/TA <b>${summary.kills}/${summary.errors}/${summary.attempts}</b>` : ""}
         </div>
-      </div>
-      <div class="addRow">
-        <input id="playerInput${teamIndex}" placeholder="Player # or name" inputmode="numeric" autocomplete="off" onkeydown="if(event.key==='Enter')addPlayer(${teamIndex}, false)">
-        <button type="button" onclick="addPlayer(${teamIndex}, false)">Add<br>Player</button>
-        <button type="button" class="libBtn" onclick="addPlayer(${teamIndex}, true)">Add<br>Libero</button>
       </div>
       ${renderHeatMap(team)}
       <div class="players">
