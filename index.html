@@ -51,7 +51,7 @@
 
   <nav class="bottomBar" aria-label="Actions">
     <button type="button" id="undoBtn">Undo</button>
-    <button type="button" id="printBtn">PDF</button>
+    <button type="button" id="printBtn" onclick="exportPDF()">PDF</button>
     <button type="button" id="resetBtn">Reset</button>
   </nav>
 
@@ -86,8 +86,15 @@
     <button type="button" id="toastUndoBtn">Undo</button>
   </div>
 
+  <div id="pdfPanel" class="pdfPanel" role="status" aria-live="polite">
+    <span>PDF ready</span>
+    <a id="pdfOpenLink" href="#" target="_blank" rel="noopener">Open</a>
+    <a id="pdfDownloadLink" href="#" download>Download</a>
+    <button type="button" id="pdfCloseBtn">Close</button>
+  </div>
+
   <section id="printSummary" class="printSummary"></section>
 
-  <script src="./app.js"></script>
+  <script src="./app.js?v=20260628-pdf5"></script>
 </body>
 </html>

@@ -37,6 +37,10 @@ const rosterTitle = document.getElementById("rosterTitle");
 const rosterList = document.getElementById("rosterList");
 const undoToast = document.getElementById("undoToast");
 const toastText = document.getElementById("toastText");
+const pdfPanel = document.getElementById("pdfPanel");
+const pdfOpenLink = document.getElementById("pdfOpenLink");
+const pdfDownloadLink = document.getElementById("pdfDownloadLink");
+const pdfCloseBtn = document.getElementById("pdfCloseBtn");
 
 function save() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -464,6 +468,231 @@ function renderPrintSummary() {
   `;
 }
 
+function makePdfLines() {
+  const lines = [
+    "Volleyball Scout",
+    `Date: ${todayStamp()}`,
+    `Teams: ${state.settings.twoTeams ? "2" : "1"}`,
+    `Tracking: ${state.settings.receive ? "Serve Receive" : ""}${state.settings.receive && state.settings.attack ? " + " : ""}${state.settings.attack ? "Attacking" : ""}`,
+    ""
+  ];
+
+  visibleTeams().forEach((team, teamIndex) => {
+    const summary = teamSummary(team);
+    lines.push(`${teamIndex + 1}. ${team.name || `Team ${teamIndex + 1}`}`);
+    if (state.settings.receive) lines.push(`Serve receive average: ${summary.sr}`);
+    if (state.settings.attack) lines.push(`Hitting: ${summary.hitPct}   K/E/TA: ${summary.kills}/${summary.errors}/${summary.attempts}`);
+    lines.push("");
+
+    if (state.settings.receive) {
+      lines.push("Serve Receive Ranking - ties sort worse by higher 0%");
+      lines.push("Player        Avg     0%      Passes   History");
+      lines.push("------------------------------------------------------------");
+      const ranks = srRanks(team);
+      if (ranks.length) {
+        ranks.forEach(rank => {
+          lines.push(
+            padRight(label(rank.player.number), 14) +
+            padRight(rank.avg.toFixed(2), 8) +
+            padRight(`${Math.round(rank.zeros * 100)}%`, 8) +
+            padRight(rank.attempts, 9) +
+            passHistory(rank.player)
+          );
+        });
+      } else {
+        lines.push("No serve receive data.");
+      }
+      lines.push("");
+    }
+
+    if (state.settings.attack) {
+      lines.push("Attacking Ranking");
+      lines.push("Player        Hit%    K     E     TA    Tips   History");
+      lines.push("------------------------------------------------------------");
+      const ranks = hitRanks(team);
+      if (ranks.length) {
+        ranks.forEach(rank => {
+          lines.push(
+            padRight(label(rank.player.number), 14) +
+            padRight(rank.stats.pct || ".000", 8) +
+            padRight(rank.stats.kills, 6) +
+            padRight(rank.stats.errors, 6) +
+            padRight(rank.stats.attempts, 6) +
+            padRight(`${rank.stats.tipKills}/${rank.stats.tips}`, 7) +
+            (rank.player.attacks.length ? rank.player.attacks.join(", ") : "-")
+          );
+        });
+      } else {
+        lines.push("No attack data.");
+      }
+      lines.push("");
+    }
+
+    lines.push("Roster");
+    lines.push("Player        Role      SR Avg  0%      Passes  Hit%    K/E/TA");
+    lines.push("------------------------------------------------------------");
+    if (team.players.length) {
+      team.players.forEach(player => {
+        const attacks = attackStats(player);
+        lines.push(
+          padRight(label(player.number), 14) +
+          padRight(player.libero ? "Libero" : "Player", 10) +
+          padRight(receiveAvg(player) || "-", 8) +
+          padRight(player.receive.length ? `${Math.round(zeroPct(player) * 100)}%` : "-", 8) +
+          padRight(player.receive.length || "-", 8) +
+          padRight(attacks.pct || "-", 8) +
+          `${attacks.kills}/${attacks.errors}/${attacks.attempts}`
+        );
+      });
+    } else {
+      lines.push("No players.");
+    }
+    lines.push("");
+  });
+
+  return lines;
+}
+
+function todayStamp() {
+  const date = new Date();
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function padRight(value, width) {
+  let text = String(value);
+  while (text.length < width) text += " ";
+  return text;
+}
+
+function pdfEscape(value) {
+  return String(value)
+    .replace(/[^\x20-\x7E]/g, "-")
+    .replace(/\\/g, "\\\\")
+    .replace(/\(/g, "\\(")
+    .replace(/\)/g, "\\)");
+}
+
+function buildPdfBlob(lines) {
+  const pageWidth = 612;
+  const pageHeight = 792;
+  const margin = 42;
+  const lineHeight = 14;
+  const linesPerPage = Math.floor((pageHeight - margin * 2) / lineHeight);
+  const pages = [];
+
+  for (let index = 0; index < lines.length; index += linesPerPage) {
+    pages.push(lines.slice(index, index + linesPerPage));
+  }
+  if (!pages.length) pages.push(["No scouting data."]);
+
+  const objects = [];
+  const fontObjectNumber = 3 + pages.length * 2;
+
+  objects[1] = "<< /Type /Catalog /Pages 2 0 R >>";
+  objects[2] = `<< /Type /Pages /Kids [${pages.map((_, index) => `${3 + index * 2} 0 R`).join(" ")}] /Count ${pages.length} >>`;
+
+  pages.forEach((pageLines, index) => {
+    const pageObjectNumber = 3 + index * 2;
+    const contentObjectNumber = pageObjectNumber + 1;
+    let content = `BT\n/F1 10 Tf\n${margin} ${pageHeight - margin} Td\n`;
+    pageLines.forEach((line, lineIndex) => {
+      if (lineIndex > 0) content += `0 -${lineHeight} Td\n`;
+      content += `(${pdfEscape(line)}) Tj\n`;
+    });
+    content += "ET";
+
+    objects[pageObjectNumber] =
+      `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pageWidth} ${pageHeight}] ` +
+      `/Resources << /Font << /F1 ${fontObjectNumber} 0 R >> >> ` +
+      `/Contents ${contentObjectNumber} 0 R >>`;
+    objects[contentObjectNumber] = `<< /Length ${content.length} >>\nstream\n${content}\nendstream`;
+  });
+
+  objects[fontObjectNumber] = "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>";
+
+  let pdf = "%PDF-1.4\n";
+  const offsets = [0];
+  for (let objectNumber = 1; objectNumber < objects.length; objectNumber++) {
+    if (!objects[objectNumber]) continue;
+    offsets[objectNumber] = pdf.length;
+    pdf += `${objectNumber} 0 obj\n${objects[objectNumber]}\nendobj\n`;
+  }
+
+  const xrefOffset = pdf.length;
+  pdf += `xref\n0 ${objects.length}\n`;
+  pdf += "0000000000 65535 f \n";
+  for (let index = 1; index < objects.length; index++) {
+    pdf += `${String(offsets[index]).padStart(10, "0")} 00000 n \n`;
+  }
+  pdf += `trailer\n<< /Size ${objects.length} /Root 1 0 R >>\n`;
+  pdf += `startxref\n${xrefOffset}\n%%EOF`;
+
+  return new Blob([pdf], { type: "application/pdf" });
+}
+
+function safeFileName(value) {
+  return (value || "volleyball_scout").trim().replace(/[^a-z0-9_-]+/gi, "_").replace(/^_+|_+$/g, "") || "volleyball_scout";
+}
+
+function reportFileName() {
+  const names = visibleTeams().map(team => team.name).filter(Boolean).join("_vs_");
+  return `${safeFileName(names || "volleyball_scout")}_${todayStamp()}.pdf`;
+}
+
+function openBlob(blob) {
+  const url = URL.createObjectURL(blob);
+  window.location.href = url;
+}
+
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.target = "_blank";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function showPdfPanel(blob, filename) {
+  const oldUrl = pdfPanel.dataset.url;
+  if (oldUrl) URL.revokeObjectURL(oldUrl);
+
+  const url = URL.createObjectURL(blob);
+  pdfPanel.dataset.url = url;
+  pdfOpenLink.href = url;
+  pdfDownloadLink.href = url;
+  pdfDownloadLink.download = filename;
+  pdfPanel.classList.add("show");
+}
+
+function hidePdfPanel() {
+  const oldUrl = pdfPanel.dataset.url;
+  if (oldUrl) URL.revokeObjectURL(oldUrl);
+  delete pdfPanel.dataset.url;
+  pdfPanel.classList.remove("show");
+  pdfOpenLink.href = "#";
+  pdfDownloadLink.href = "#";
+}
+
+function exportPDF() {
+  const filename = reportFileName();
+  const blob = buildPdfBlob(makePdfLines());
+  const file = new File([blob], filename, { type: "application/pdf" });
+  const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+  if (isIOS && navigator.canShare && navigator.share && navigator.canShare({ files: [file] })) {
+    navigator.share({ files: [file], title: "Volleyball Scout report" }).catch(error => {
+      if (!error || error.name !== "AbortError") showPdfPanel(blob, filename);
+    });
+    return;
+  }
+
+  showPdfPanel(blob, filename);
+}
+
 function printTable(title, headers, rows) {
   if (!rows.length) return `<h3>${title}</h3><p>No data.</p>`;
   return `
@@ -512,7 +741,7 @@ function bindStaticControls() {
   document.getElementById("settingsBtn").addEventListener("click", () => settingsPanel.classList.toggle("open"));
   document.getElementById("undoBtn").addEventListener("click", undoLast);
   document.getElementById("toastUndoBtn").addEventListener("click", undoLast);
-  document.getElementById("printBtn").addEventListener("click", () => window.print());
+  pdfCloseBtn.addEventListener("click", hidePdfPanel);
   document.getElementById("resetBtn").addEventListener("click", resetAll);
 
   [

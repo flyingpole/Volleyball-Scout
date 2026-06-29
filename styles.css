@@ -530,6 +530,42 @@ h1 {
   padding: 0 12px;
 }
 
+.pdfPanel {
+  position: fixed;
+  left: 10px;
+  right: 10px;
+  bottom: 64px;
+  z-index: 31;
+  display: none;
+  grid-template-columns: 1fr auto auto auto;
+  gap: 6px;
+  align-items: center;
+  padding: 8px;
+  border: 1px solid #777;
+  border-radius: 8px;
+  background: #242722;
+  color: #fff;
+  box-shadow: 0 6px 20px #0006;
+  font-size: 14px;
+}
+
+.pdfPanel.show {
+  display: grid;
+}
+
+.pdfPanel a,
+.pdfPanel button {
+  min-height: 34px;
+  padding: 7px 10px;
+  border: 1px solid #a8aaa3;
+  border-radius: 7px;
+  background: #fff;
+  color: var(--text);
+  font-weight: 800;
+  text-decoration: none;
+  text-align: center;
+}
+
 .printSummary {
   display: none;
 }
@@ -551,7 +587,7 @@ h1 {
     padding: 0;
   }
 
-  .appHeader, .modeBar, .settingsPanel, .teams, .bottomBar, .scoreDialog, .rosterDialog, .undoToast {
+  .appHeader, .modeBar, .settingsPanel, .teams, .bottomBar, .scoreDialog, .rosterDialog, .undoToast, .pdfPanel {
     display: none !important;
   }
 
