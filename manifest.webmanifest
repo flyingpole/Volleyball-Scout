@@ -1,0 +1,10 @@
+{
+  "name": "Volleyball Scout",
+  "short_name": "VB Scout",
+  "description": "Phone-first volleyball scouting tracker for serve receive and attacking.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f7f7f4",
+  "theme_color": "#242722",
+  "icons": []
+}

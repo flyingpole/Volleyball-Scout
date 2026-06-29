@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f7f7f4">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="VB Scout">
+  <meta name="description" content="Phone-first volleyball scouting tracker for serve receive and attacking.">
+  <title>Volleyball Scout</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <header class="appHeader">
+    <div>
+      <h1>Volleyball Scout</h1>
+      <div class="subhead">Serve receive and attacking tracker</div>
+    </div>
+    <button type="button" id="settingsBtn" class="iconBtn" aria-label="Tracking settings">Track</button>
+  </header>
+
+  <section id="settingsPanel" class="settingsPanel" aria-label="Tracking settings">
+    <label class="switchLine">
+      <span>Track 2 teams</span>
+      <span class="switch"><input id="twoTeamsToggle" type="checkbox"><span></span></span>
+    </label>
+    <label class="switchLine">
+      <span>Serve receive</span>
+      <span class="switch"><input id="receiveToggle" type="checkbox" checked><span></span></span>
+    </label>
+    <label class="switchLine">
+      <span>Attacking</span>
+      <span class="switch"><input id="attackToggle" type="checkbox" checked><span></span></span>
+    </label>
+    <label class="switchLine">
+      <span>SR heat map</span>
+      <span class="switch"><input id="heatToggle" type="checkbox" checked><span></span></span>
+    </label>
+    <label class="switchLine">
+      <span>Haptics</span>
+      <span class="switch"><input id="hapticsToggle" type="checkbox" checked><span></span></span>
+    </label>
+  </section>
+
+  <main id="teams" class="teams"></main>
+
+  <nav class="bottomBar" aria-label="Actions">
+    <button type="button" id="undoBtn">Undo</button>
+    <button type="button" id="printBtn">PDF</button>
+    <button type="button" id="resetBtn">Reset</button>
+  </nav>
+
+  <dialog id="scoreDialog" class="scoreDialog">
+    <form method="dialog">
+      <div class="dialogTop">
+        <div>
+          <div id="dialogTitle" class="dialogTitle">Score</div>
+          <div id="dialogMeta" class="dialogMeta"></div>
+        </div>
+        <button type="submit" class="closeBtn" aria-label="Close">x</button>
+      </div>
+      <div id="scoreChoices" class="scoreChoices"></div>
+    </form>
+  </dialog>
+
+  <div id="undoToast" class="undoToast" role="status" aria-live="polite">
+    <span id="toastText">Recorded</span>
+    <button type="button" id="toastUndoBtn">Undo</button>
+  </div>
+
+  <section id="printSummary" class="printSummary"></section>
+
+  <script src="./app.js"></script>
+</body>
+</html>
