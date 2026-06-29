@@ -76,24 +76,11 @@ h1 {
   background: #f3f3ee;
 }
 
-.modeBar {
-  position: sticky;
-  top: 52px;
-  z-index: 14;
-  padding: 6px 10px;
-  background: #f0f0eb;
-  border-bottom: 1px solid var(--line);
-}
-
-.modeSwitch {
-  min-height: 36px;
-}
-
 .settingsPanel {
   display: none;
   position: sticky;
-  top: 101px;
-  z-index: 13;
+  top: 52px;
+  z-index: 14;
   grid-template-columns: 1fr;
   gap: 4px;
   padding: 7px 10px;
@@ -595,7 +582,7 @@ h1 {
   }
 
   .settingsPanel {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
   }
 }
 
@@ -605,7 +592,7 @@ h1 {
     padding: 0;
   }
 
-  .appHeader, .modeBar, .settingsPanel, .teams, .bottomBar, .scoreDialog, .rosterDialog, .undoToast, .pdfPanel {
+  .appHeader, .settingsPanel, .teams, .bottomBar, .scoreDialog, .rosterDialog, .undoToast, .pdfPanel {
     display: none !important;
   }
 
