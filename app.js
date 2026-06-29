@@ -24,6 +24,7 @@ let state = {
 let selectedScore = null;
 let toastTimer = null;
 let resetTimer = null;
+let attackTapTimer = null;
 
 const teamsEl = document.getElementById("teams");
 const settingsPanel = document.getElementById("settingsPanel");
@@ -223,7 +224,6 @@ function openScore(type, teamIndex, playerId) {
     ? [{ value: 0, text: "0" }, { value: 1, text: "1" }, { value: 2, text: "2" }, { value: 3, text: "3" }]
     : [
       { value: "+", text: "+" },
-      { value: ".", text: "." },
       { value: "-", text: "-" },
       { value: "T", text: "T" },
       { value: "t", text: "t" }
@@ -242,27 +242,47 @@ function openScore(type, teamIndex, playerId) {
 
 function recordScore(value) {
   if (!selectedScore) return;
-  const player = findPlayer(selectedScore.team, selectedScore.id);
+  recordScoreFor(selectedScore.type, selectedScore.team, selectedScore.id, value);
+  scoreDialog.close();
+}
+
+function recordScoreFor(type, teamIndex, playerId, value) {
+  const player = findPlayer(teamIndex, playerId);
   if (!player) return;
 
-  if (selectedScore.type === "receive") {
+  if (type === "receive") {
     player.receive.push(Number(value));
   } else {
     player.attacks.push(String(value));
   }
 
   state.history.push({
-    type: selectedScore.type,
-    team: selectedScore.team,
-    id: selectedScore.id,
+    type,
+    team: teamIndex,
+    id: playerId,
     value
   });
 
   buzz(60);
   save();
   render();
-  scoreDialog.close();
-  showUndoToast(`${label(player.number)} ${selectedScore.type === "receive" ? "SR" : "ATT"} ${value}`);
+  showUndoToast(`${label(player.number)} ${type === "receive" ? "SR" : "ATT"} ${value}`);
+}
+
+function handleAttackClick(teamIndex, playerId) {
+  clearTimeout(attackTapTimer);
+  attackTapTimer = setTimeout(() => {
+    attackTapTimer = null;
+    openScore("attack", teamIndex, playerId);
+  }, 240);
+}
+
+function handleAttackDoubleClick(event, teamIndex, playerId) {
+  event.preventDefault();
+  clearTimeout(attackTapTimer);
+  attackTapTimer = null;
+  if (scoreDialog.open) scoreDialog.close();
+  recordScoreFor("attack", teamIndex, playerId, ".");
 }
 
 function undoLast() {
@@ -408,7 +428,7 @@ function renderPlayer(player, teamIndex) {
       ${state.settings.receive ? `<div class="playerHistory"><b>SR hist:</b> ${esc(passHistory(player))}</div>` : ""}
       <div class="playerActions">
         ${state.settings.receive ? `<button type="button" class="srBtn" onclick="openScore('receive', ${teamIndex}, '${player.id}')">SR</button>` : ""}
-        ${state.settings.attack ? `<button type="button" class="attBtn" onclick="openScore('attack', ${teamIndex}, '${player.id}')">ATT</button>` : ""}
+        ${state.settings.attack ? `<button type="button" class="attBtn" onclick="handleAttackClick(${teamIndex}, '${player.id}')" ondblclick="handleAttackDoubleClick(event, ${teamIndex}, '${player.id}')" title="Double-click for attempt">ATT</button>` : ""}
       </div>
     </div>
   `;
