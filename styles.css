@@ -210,7 +210,7 @@ h1 {
 
 .addRow {
   display: grid;
-  grid-template-columns: 1fr 58px 58px;
+  grid-template-columns: 1fr 74px 74px;
   gap: 5px;
   padding: 7px;
   border-bottom: 1px solid var(--line);
@@ -227,6 +227,7 @@ h1 {
 .addRow button {
   padding: 0 4px;
   font-size: 12px;
+  line-height: 1.05;
 }
 
 .libBtn {
@@ -281,9 +282,7 @@ h1 {
 .playerRow {
   display: grid;
   grid-template-columns: minmax(62px, 78px) 1fr auto;
-  grid-template-areas:
-    "id metrics actions"
-    "id history actions";
+  grid-template-areas: "id metrics actions";
   gap: 5px;
   align-items: stretch;
   min-height: 56px;
@@ -348,6 +347,21 @@ h1 {
   line-height: 1.1;
 }
 
+.compactMetric {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: baseline;
+  gap: 2px 8px;
+  text-align: left;
+  line-height: 1.2;
+}
+
+.compactMetric b {
+  display: inline;
+}
+
 .playerActions {
   grid-area: actions;
   display: grid;
@@ -355,23 +369,6 @@ h1 {
   grid-auto-columns: 46px;
   gap: 4px;
   align-items: stretch;
-}
-
-.playerHistory {
-  grid-area: history;
-  min-width: 0;
-  padding: 3px 5px;
-  border: 1px solid #ecebe5;
-  border-radius: 6px;
-  background: #fafaf7;
-  color: var(--muted);
-  font-size: 11px;
-  line-height: 1.2;
-  overflow-wrap: anywhere;
-}
-
-.playerHistory b {
-  color: var(--text);
 }
 
 .srBtn {
@@ -460,7 +457,7 @@ h1 {
 }
 
 .scoreChoices.attack {
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
 }
 
 .scoreChoices button {

@@ -224,6 +224,7 @@ function openScore(type, teamIndex, playerId) {
     ? [{ value: 0, text: "0" }, { value: 1, text: "1" }, { value: 2, text: "2" }, { value: 3, text: "3" }]
     : [
       { value: "+", text: "+" },
+      { value: ".", text: "." },
       { value: "-", text: "-" },
       { value: "T", text: "T" },
       { value: "t", text: "t" }
@@ -397,8 +398,8 @@ function renderTeam(team, teamIndex) {
       </div>
       <div class="addRow">
         <input id="playerInput${teamIndex}" placeholder="Player # or name" inputmode="numeric" autocomplete="off" onkeydown="if(event.key==='Enter')addPlayer(${teamIndex}, false)">
-        <button type="button" onclick="addPlayer(${teamIndex}, false)">Add</button>
-        <button type="button" class="libBtn" onclick="addPlayer(${teamIndex}, true)">Lib</button>
+        <button type="button" onclick="addPlayer(${teamIndex}, false)">Add<br>Player</button>
+        <button type="button" class="libBtn" onclick="addPlayer(${teamIndex}, true)">Add<br>Libero</button>
       </div>
       ${renderHeatMap(team)}
       <div class="players">
@@ -423,9 +424,8 @@ function renderPlayer(player, teamIndex) {
       </div>
       <div class="playerMetrics">
         ${state.settings.receive ? `<div class="metric">SR<b>${srAvg}</b></div><div class="metric">Passes<b>${srCount}</b></div><div class="metric">0%<b>${srZeroPct}</b></div>` : ""}
-        ${state.settings.attack ? `<div class="metric">Hit %<b>${attackPct}</b></div>` : ""}
+        ${state.settings.attack || state.settings.receive ? `<div class="metric compactMetric">${state.settings.attack ? `<span>Hit % <b>${attackPct}</b></span>` : ""}${state.settings.receive ? `<span><b>SR hist:</b> ${esc(passHistory(player))}</span>` : ""}</div>` : ""}
       </div>
-      ${state.settings.receive ? `<div class="playerHistory"><b>SR hist:</b> ${esc(passHistory(player))}</div>` : ""}
       <div class="playerActions">
         ${state.settings.receive ? `<button type="button" class="srBtn" onclick="openScore('receive', ${teamIndex}, '${player.id}')">SR</button>` : ""}
         ${state.settings.attack ? `<button type="button" class="attBtn" onclick="handleAttackClick(${teamIndex}, '${player.id}')" ondblclick="handleAttackDoubleClick(event, ${teamIndex}, '${player.id}')" title="Double-click for attempt">ATT</button>` : ""}
