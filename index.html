@@ -21,11 +21,14 @@
     <button type="button" id="settingsBtn" class="iconBtn" aria-label="Tracking settings">Track</button>
   </header>
 
-  <section id="settingsPanel" class="settingsPanel" aria-label="Tracking settings">
-    <label class="switchLine">
-      <span>Track 2 teams</span>
+  <section class="modeBar" aria-label="Team scouting mode">
+    <label class="switchLine modeSwitch">
+      <span>Scout 2 teams at same time</span>
       <span class="switch"><input id="twoTeamsToggle" type="checkbox"><span></span></span>
     </label>
+  </section>
+
+  <section id="settingsPanel" class="settingsPanel" aria-label="Tracking settings">
     <label class="switchLine">
       <span>Serve receive</span>
       <span class="switch"><input id="receiveToggle" type="checkbox" checked><span></span></span>
