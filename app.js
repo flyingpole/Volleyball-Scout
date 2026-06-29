@@ -23,7 +23,6 @@ let state = {
 
 let selectedScore = null;
 let toastTimer = null;
-let resetTimer = null;
 let attackTapTimer = null;
 
 const teamsEl = document.getElementById("teams");
@@ -33,6 +32,7 @@ const scoreChoices = document.getElementById("scoreChoices");
 const dialogTitle = document.getElementById("dialogTitle");
 const dialogMeta = document.getElementById("dialogMeta");
 const rosterDialog = document.getElementById("rosterDialog");
+const clearDialog = document.getElementById("clearDialog");
 const rosterTitle = document.getElementById("rosterTitle");
 const rosterList = document.getElementById("rosterList");
 const undoToast = document.getElementById("undoToast");
@@ -780,19 +780,10 @@ function renameTeam(teamIndex, name) {
 }
 
 function resetAll() {
-  const button = document.getElementById("resetBtn");
-  if (!button.classList.contains("confirmReset")) {
-    button.classList.add("confirmReset");
-    button.textContent = "Confirm";
-    clearTimeout(resetTimer);
-    resetTimer = setTimeout(() => {
-      button.classList.remove("confirmReset");
-      button.textContent = "Reset";
-    }, 3000);
-    return;
-  }
+  clearDialog.showModal();
+}
 
-  clearTimeout(resetTimer);
+function confirmClearData() {
   localStorage.removeItem(STORAGE_KEY);
   state = {
     settings: { twoTeams: false, receive: true, attack: true, heat: true, haptics: true },
@@ -804,6 +795,7 @@ function resetAll() {
   };
   save();
   render();
+  clearDialog.close();
 }
 
 function bindStaticControls() {
@@ -812,6 +804,8 @@ function bindStaticControls() {
   document.getElementById("toastUndoBtn").addEventListener("click", undoLast);
   pdfCloseBtn.addEventListener("click", hidePdfPanel);
   document.getElementById("resetBtn").addEventListener("click", resetAll);
+  document.getElementById("cancelClearBtn").addEventListener("click", () => clearDialog.close());
+  document.getElementById("confirmClearBtn").addEventListener("click", confirmClearData);
 
   [
     ["twoTeamsToggle", "twoTeams"],

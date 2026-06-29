@@ -80,6 +80,17 @@
     </form>
   </dialog>
 
+  <dialog id="clearDialog" class="clearDialog">
+    <form method="dialog">
+      <div class="dialogTitle">Confirm Clear Data</div>
+      <div class="dialogMeta">This will remove all teams, players, and scouting history.</div>
+      <div class="confirmActions">
+        <button type="button" id="cancelClearBtn" class="secondaryBtn">No</button>
+        <button type="button" id="confirmClearBtn" class="dangerBtn">Yes</button>
+      </div>
+    </form>
+  </dialog>
+
   <div id="undoToast" class="undoToast" role="status" aria-live="polite">
     <span id="toastText">Recorded</span>
     <button type="button" id="toastUndoBtn">Undo</button>

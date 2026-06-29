@@ -409,14 +409,9 @@ h1 {
   border-top: 1px solid var(--line);
 }
 
-.bottomBar button.confirmReset {
-  background: #ffe1de;
-  border-color: var(--danger);
-  color: var(--danger);
-}
-
 .scoreDialog,
-.rosterDialog {
+.rosterDialog,
+.clearDialog {
   width: min(360px, calc(100vw - 22px));
   border: 1px solid #777;
   border-radius: 8px;
@@ -425,12 +420,14 @@ h1 {
 }
 
 .scoreDialog::backdrop,
-.rosterDialog::backdrop {
+.rosterDialog::backdrop,
+.clearDialog::backdrop {
   background: #0007;
 }
 
 .scoreDialog form,
-.rosterDialog form {
+.rosterDialog form,
+.clearDialog form {
   margin: 0;
   padding: 10px;
 }
@@ -457,6 +454,23 @@ h1 {
 .closeBtn {
   width: 34px;
   min-height: 34px;
+}
+
+.confirmActions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.secondaryBtn {
+  background: #f7f7f4;
+}
+
+.dangerBtn {
+  background: #ffe1de;
+  border-color: var(--danger);
+  color: var(--danger);
 }
 
 .scoreChoices {
