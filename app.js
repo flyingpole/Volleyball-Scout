@@ -558,6 +558,11 @@ function todayStamp() {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
 
+function timeStamp() {
+  const date = new Date();
+  return `${String(date.getHours()).padStart(2, "0")}-${String(date.getMinutes()).padStart(2, "0")}`;
+}
+
 function padRight(value, width) {
   let text = String(value);
   while (text.length < width) text += " ";
@@ -636,7 +641,7 @@ function safeFileName(value) {
 
 function reportFileName() {
   const names = visibleTeams().map(team => team.name).filter(Boolean).join("_vs_");
-  return `${safeFileName(names || "volleyball_scout")}_${todayStamp()}.pdf`;
+  return `${safeFileName(names || "volleyball_scout")}_${todayStamp()}_${timeStamp()}.pdf`;
 }
 
 function openBlob(blob) {
