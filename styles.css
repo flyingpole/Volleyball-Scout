@@ -347,19 +347,26 @@ h1 {
   line-height: 1.1;
 }
 
-.compactMetric {
+.metricPair {
   grid-column: 1 / -1;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-start;
-  align-items: baseline;
-  gap: 2px 8px;
-  text-align: left;
-  line-height: 1.2;
+  display: grid;
+  grid-template-columns: minmax(58px, 82px) minmax(0, 1fr);
+  gap: 4px;
 }
 
-.compactMetric b {
+.metricPair.singleMetricPair {
+  grid-template-columns: 1fr;
+}
+
+.hitMetric b,
+.historyMetric b {
   display: inline;
+}
+
+.historyMetric {
+  text-align: left;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
 }
 
 .playerActions {

@@ -428,7 +428,7 @@ function renderPlayer(player, teamIndex) {
       </div>
       <div class="playerMetrics">
         ${state.settings.receive ? `<div class="metric">SR<b>${srAvg}</b></div><div class="metric">Passes<b>${srCount}</b></div><div class="metric">0%<b>${srZeroPct}</b></div>` : ""}
-        ${state.settings.attack || state.settings.receive ? `<div class="metric compactMetric">${state.settings.attack ? `<span>Hit % <b>${attackPct}</b></span>` : ""}${state.settings.receive ? `<span><b>SR hist:</b> ${esc(passHistory(player))}</span>` : ""}</div>` : ""}
+        ${state.settings.attack || state.settings.receive ? `<div class="metricPair ${state.settings.attack && state.settings.receive ? "" : "singleMetricPair"}">${state.settings.attack ? `<div class="metric hitMetric">Hit %<b>${attackPct}</b></div>` : ""}${state.settings.receive ? `<div class="metric historyMetric"><b>SR hist:</b> ${esc(passHistory(player))}</div>` : ""}</div>` : ""}
       </div>
       <div class="playerActions">
         ${state.settings.receive ? `<button type="button" class="srBtn" onclick="openScore('receive', ${teamIndex}, '${player.id}')">SR</button>` : ""}
