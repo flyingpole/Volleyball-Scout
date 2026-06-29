@@ -363,6 +363,15 @@ h1 {
   display: inline;
 }
 
+.hitMetric span {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
 .historyMetric {
   text-align: left;
   line-height: 1.2;
