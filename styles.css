@@ -197,7 +197,7 @@ h1 {
 
 .rosterAddRow {
   display: grid;
-  grid-template-columns: 1fr 74px 74px;
+  grid-template-columns: minmax(0, 1fr) 68px 68px;
   gap: 5px;
   padding: 7px;
   border: 1px solid var(--line);
@@ -209,13 +209,13 @@ h1 {
   min-width: 0;
   border: 1px solid #aaa;
   border-radius: 7px;
-  padding: 8px;
-  font-size: 16px;
+  padding: 8px 6px;
+  font-size: 15px;
 }
 
 .rosterAddRow button {
-  padding: 0 4px;
-  font-size: 12px;
+  padding: 0 2px;
+  font-size: 11px;
   line-height: 1.05;
 }
 
