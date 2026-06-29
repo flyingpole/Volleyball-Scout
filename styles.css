@@ -376,6 +376,13 @@ h1 {
   align-items: stretch;
 }
 
+.playerActions button {
+  font-size: 10px;
+  line-height: 1.05;
+  overflow-wrap: anywhere;
+  padding-inline: 2px;
+}
+
 .srBtn {
   background: #e1efff;
   border-color: #82aedb;
@@ -468,6 +475,12 @@ h1 {
 .scoreChoices button {
   min-height: 70px;
   font-size: 28px;
+}
+
+.scoreChoices.attack button {
+  font-size: 12px;
+  line-height: 1.1;
+  padding-inline: 2px;
 }
 
 .rosterList {

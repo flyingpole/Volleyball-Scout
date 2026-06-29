@@ -238,11 +238,11 @@ function openScore(type, teamIndex, playerId) {
   const choices = type === "receive"
     ? [{ value: 0, text: "0" }, { value: 1, text: "1" }, { value: 2, text: "2" }, { value: 3, text: "3" }]
     : [
-      { value: "+", text: "+" },
-      { value: ".", text: "." },
-      { value: "-", text: "-" },
-      { value: "T", text: "T" },
-      { value: "t", text: "t" }
+      { value: "T", text: "Tip Kill" },
+      { value: "t", text: "tip att" },
+      { value: "-", text: "Error" },
+      { value: ".", text: "Attempt" },
+      { value: "+", text: "Kill" }
     ];
 
   choices.forEach(choice => {
@@ -437,8 +437,8 @@ function renderPlayer(player, teamIndex) {
         ${state.settings.attack || state.settings.receive ? `<div class="metricPair ${state.settings.attack && state.settings.receive ? "" : "singleMetricPair"}">${state.settings.attack ? `<div class="metric hitMetric">Hit %<b>${attackPct}</b><span>K/E/TA ${attacks.kills}/${attacks.errors}/${attacks.attempts}</span></div>` : ""}${state.settings.receive ? `<div class="metric historyMetric"><b>SR hist:</b> ${esc(passHistory(player))}</div>` : ""}</div>` : ""}
       </div>
       <div class="playerActions">
-        ${state.settings.receive ? `<button type="button" class="srBtn" onclick="openScore('receive', ${teamIndex}, '${player.id}')">SR</button>` : ""}
-        ${state.settings.attack ? `<button type="button" class="attBtn" onclick="handleAttackClick(${teamIndex}, '${player.id}')" ondblclick="handleAttackDoubleClick(event, ${teamIndex}, '${player.id}')" title="Double-click for attempt">ATT</button>` : ""}
+        ${state.settings.receive ? `<button type="button" class="srBtn" onclick="openScore('receive', ${teamIndex}, '${player.id}')">Serve Receive</button>` : ""}
+        ${state.settings.attack ? `<button type="button" class="attBtn" onclick="handleAttackClick(${teamIndex}, '${player.id}')" ondblclick="handleAttackDoubleClick(event, ${teamIndex}, '${player.id}')" title="Double-click for attempt">Attack</button>` : ""}
       </div>
     </div>
   `;
